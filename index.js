@@ -25,10 +25,25 @@ async function run() {
     const database = client.db("Hire");
     const JobsCollections = database.collection("Jobs");
 
+    // get
+    app.get("/api/jobs", async (req, res) => {
+      const query = {};
+      if (req.query.companyId) {
+        query.companyId = req.query.companyId;
+      }
+
+      if (req.query.status) {
+        query.status = req.query.status;
+      }
+
+      const result = await JobsCollections.find(query).toArray();
+      res.json(result);
+    });
+
     // post
-    app.post("/josb", async (req, res) => {
+    app.post("/api/jobs", async (req, res) => {
       const job = req.body;
-      const result = await JobsCollections.insertOne(jsb);
+      const result = await JobsCollections.insertOne(job);
       res.json(result);
     });
 
