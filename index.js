@@ -44,7 +44,11 @@ async function run() {
     // post
     app.post("/api/jobs", async (req, res) => {
       const job = req.body;
-      const result = await JobsCollections.insertOne(job);
+      const newJobs = {
+        ...job,
+        createdAt: new Date(),
+      };
+      const result = await JobsCollections.insertOne(newJobs);
       res.json(result);
     });
 
@@ -60,7 +64,11 @@ async function run() {
 
     app.post("/api/companies", async (req, res) => {
       const companies = req.body;
-      const result = await companyCollections.insertOne(companies);
+      const newCompany = {
+        ...companies,
+        createdAt: new Date(),
+      };
+      const result = await companyCollections.insertOne(newCompany);
       res.json(result);
     });
 
