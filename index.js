@@ -24,6 +24,7 @@ async function run() {
     await client.connect();
     const database = client.db("Hire");
     const JobsCollections = database.collection("Jobs");
+    const companyCollections = database.collection("companies");
 
     // get
     app.get("/api/jobs", async (req, res) => {
@@ -44,6 +45,22 @@ async function run() {
     app.post("/api/jobs", async (req, res) => {
       const job = req.body;
       const result = await JobsCollections.insertOne(job);
+      res.json(result);
+    });
+
+    // company Releted api
+    app.get("/api/my/companies", async (req, res) => {
+      const query = {};
+      if (req.query.recruiterId) {
+        query.recruiterId = req.query.recruiterId;
+      }
+      const result = await companyCollections.findOne(query);
+      res.json(result);
+    });
+
+    app.post("/api/companies", async (req, res) => {
+      const companies = req.body;
+      const result = await companyCollections.insertOne(companies);
       res.json(result);
     });
 
