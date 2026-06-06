@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 app.use(cors());
@@ -25,6 +25,12 @@ async function run() {
     const database = client.db("Hire");
     const JobsCollections = database.collection("Jobs");
     const companyCollections = database.collection("companies");
+    const userCollectons = database.collection("user");
+
+    app.get("/api/users", async (req, res) => {
+      const result = await userCollectons.find().skip(6).toArray();
+      res.json(result);
+    });
 
     // get
     app.get("/api/jobs", async (req, res) => {
@@ -41,6 +47,16 @@ async function run() {
       res.json(result);
     });
 
+    app.get("/api/jobs/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = {
+        _id: new ObjectId(id),
+      };
+
+      const result = await JobsCollections.findOne(query);
+      res.json(result);
+    });
+
     // post
     app.post("/api/jobs", async (req, res) => {
       const job = req.body;
@@ -53,13 +69,18 @@ async function run() {
     });
 
     // company Releted api
+    app.get("/api/companies", async (req, res) => {
+      const result = await companyCollections.find().toArray();
+      res.json(result);
+    });
+
     app.get("/api/my/companies", async (req, res) => {
       const query = {};
       if (req.query.recruiterId) {
         query.recruiterId = req.query.recruiterId;
       }
       const result = await companyCollections.findOne(query);
-      res.json(result);
+      res.json(result || {});
     });
 
     app.post("/api/companies", async (req, res) => {
