@@ -26,6 +26,7 @@ async function run() {
     const JobsCollections = database.collection("Jobs");
     const companyCollections = database.collection("companies");
     const userCollectons = database.collection("user");
+    const applicationsCollections = database.collection("applications");
 
     app.get("/api/users", async (req, res) => {
       const result = await userCollectons.find().skip(6).toArray();
@@ -65,6 +66,17 @@ async function run() {
         createdAt: new Date(),
       };
       const result = await JobsCollections.insertOne(newJobs);
+      res.json(result);
+    });
+
+    // applications Releted api
+    app.post("/api/applications", async (req, res) => {
+      const applications = req.body;
+      const newApplications = {
+        ...applications,
+        createdAt: new Date(),
+      };
+      const result = await applicationsCollections.insertOne(newApplications);
       res.json(result);
     });
 
