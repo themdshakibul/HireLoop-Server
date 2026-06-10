@@ -27,6 +27,7 @@ async function run() {
     const companyCollections = database.collection("companies");
     const userCollectons = database.collection("user");
     const applicationsCollections = database.collection("applications");
+    const planCollections = database.collection("plans");
 
     app.get("/api/users", async (req, res) => {
       const result = await userCollectons.find().skip(6).toArray();
@@ -115,6 +116,16 @@ async function run() {
       };
       const result = await companyCollections.insertOne(newCompany);
       res.json(result);
+    });
+
+    // plans Releted api
+    app.get("/api/plans", async (req, res) => {
+      const query = {};
+      if (req.query.plan_id) {
+        query.id = req.query.plan_id;
+      }
+      const plan = await planCollections.findOne(query);
+      res.json(plan);
     });
 
     console.log(
