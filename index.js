@@ -70,6 +70,18 @@ async function run() {
     });
 
     // applications Releted api
+    app.get("/api/applications", async (req, res) => {
+      const query = {};
+      if (req.query.applicantId) {
+        query.applicantId = req.query.applicantId;
+      }
+      if (req.query.jobId) {
+        query.jobId = req.query.jobId;
+      }
+      const cursor = await applicationsCollections.find(query).toArray();
+      res.json(cursor);
+    });
+
     app.post("/api/applications", async (req, res) => {
       const applications = req.body;
       const newApplications = {
