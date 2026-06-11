@@ -28,6 +28,7 @@ async function run() {
     const userCollectons = database.collection("user");
     const applicationsCollections = database.collection("applications");
     const planCollections = database.collection("plans");
+    const subCriptionCollections = database.collection("subcriptions");
 
     app.get("/api/users", async (req, res) => {
       const result = await userCollectons.find().skip(6).toArray();
@@ -126,6 +127,31 @@ async function run() {
       }
       const plan = await planCollections.findOne(query);
       res.json(plan);
+    });
+
+    // Subcriptions Releted api
+    app.post("/api/subcriptions", async (req, res) => {
+      const data = req.body;
+      const subInfo = {
+        ...data,
+        createdAt: new Date(),
+      };
+
+      const result = await subCriptionCollections.insertOne(subInfo);
+
+      // updata the user plan information
+      const filter = { email: data.email };
+      const updateDocument = {
+        $set: {
+          plan: data.planId,
+        },
+      };
+
+      const updateResult = await userCollectons.updateOne(
+        filter,
+        updateDocument,
+      );
+      res.send(updateDocument);
     });
 
     console.log(
