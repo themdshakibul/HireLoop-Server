@@ -119,9 +119,38 @@ async function run() {
         {
           $skip: 5,
         },
+        {
+          $limit: 2,
+        },
       ];
 
       const result = companyCollections.aggregate(pipeline).toArray();
+      res.json(result);
+    });
+
+    app.get("/api/stats", async (req, res) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: "$jobType",
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+        {
+          $project: {
+            jobType: "$_id",
+            _id: 0,
+            count: 1,
+          },
+        },
+        {
+          $sort: { count: 1 },
+        },
+      ];
+
+      const result = await JobsCollections.aggregate(pipeline).toArray();
       res.json(result);
     });
 
