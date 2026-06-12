@@ -31,7 +31,7 @@ async function run() {
     const subCriptionCollections = database.collection("subcriptions");
 
     app.get("/api/users", async (req, res) => {
-      const result = await userCollectons.find().skip(6).toArray();
+      const result = await userCollectons.find().toArray();
       res.json(result);
     });
 
@@ -116,6 +116,21 @@ async function run() {
         createdAt: new Date(),
       };
       const result = await companyCollections.insertOne(newCompany);
+      res.json(result);
+    });
+
+    app.patch("/api/companies/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedCompany = req.body;
+
+      const fileter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: updatedCompany.status,
+        },
+      };
+
+      const result = await companyCollections.updateOne(fileter, updatedDoc);
       res.json(result);
     });
 
