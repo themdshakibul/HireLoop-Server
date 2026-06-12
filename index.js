@@ -95,8 +95,33 @@ async function run() {
     });
 
     // company Releted api
+    // app.get("/api/companies", async (req, res) => {
+    //   const result = await companyCollections.find().toArray();
+    //   res.json(result);
+    // });
+
+    // inefficent way to join/aggreget collection
     app.get("/api/companies", async (req, res) => {
-      const result = await companyCollections.find().toArray();
+      const companies = await companyCollections.find().toArray();
+
+      for (const company of companies) {
+        const fileter = {
+          companyId: company._id.toString(),
+        };
+        const jobCount = await JobsCollections.countDocuments(fileter);
+        company.jobCount = jobCount;
+      }
+      res.json(companies);
+    });
+
+    app.get("/api/companies2", async (req, res) => {
+      const pipeline = [
+        {
+          $skip: 5,
+        },
+      ];
+
+      const result = companyCollections.aggregate(pipeline).toArray();
       res.json(result);
     });
 
