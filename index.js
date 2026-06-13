@@ -13,24 +13,6 @@ const uri = process.env.MONGDB_URI;
 
 // jwt token
 const logger = async (req, res, next) => {
-  console.log("logger", req.params);
-  next();
-};
-
-const veryFyToken = (req, res, next) => {
-  console.log("first", req.headers);
-
-  const authHeder = req.headers?.authorization;
-  if (!authHeder) {
-    return res.status(401).send({ message: "Unothorize Access" });
-  }
-
-  const token = authHeder.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).send({ message: "Unothorize Access" });
-  }
-
   next();
 };
 
@@ -52,6 +34,43 @@ async function run() {
     const applicationsCollections = database.collection("applications");
     const planCollections = database.collection("plans");
     const subCriptionCollections = database.collection("subcriptions");
+    const sessionCollections = database.collection("session");
+
+    // veryFecation Releted api
+    const veryFyToken = async (req, res, next) => {
+      console.log("first", req.headers);
+
+      const authHeder = req.headers?.authorization;
+      if (!authHeder) {
+        return res.status(401).send({ message: "Unothorize Access" });
+      }
+
+      const token = authHeder.split(" ")[1];
+
+      if (!token) {
+        return res.status(401).send({ message: "Unothorize Access" });
+      }
+
+      const query = { token: token };
+      const session = await sessionCollections.findOne(query);
+      const userId = session.userId;
+
+      const userQuary = {
+        _id: userId,
+      };
+
+      const user = await userCollectons.findOne(userQuary);
+      // Set data in the req Object
+      req.user = user;
+      next();
+    };
+
+    const veriFySeeker = async (req, res, next) => {
+      if (req.user.role !== "seeker") {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+      next();
+    };
 
     app.get("/api/users", async (req, res) => {
       const result = await userCollectons.find().toArray();
@@ -95,17 +114,25 @@ async function run() {
     });
 
     // applications Releted api
-    app.get("/api/applications", async (req, res) => {
-      const query = {};
-      if (req.query.applicantId) {
-        query.applicantId = req.query.applicantId;
-      }
-      if (req.query.jobId) {
-        query.jobId = req.query.jobId;
-      }
-      const cursor = await applicationsCollections.find(query).toArray();
-      res.json(cursor);
-    });
+    app.get(
+      "/api/applications",
+      veryFyToken,
+      veriFySeeker,
+      async (req, res) => {
+        const query = {};
+        if (req.query.applicantId) {
+          query.applicantId = req.query.applicantId;
+
+          // check whether asking for user information on some else
+          console.log(req.user, req.query.applicantId);
+        }
+        if (req.query.jobId) {
+          query.jobId = req.query.jobId;
+        }
+        const cursor = await applicationsCollections.find(query).toArray();
+        res.json(cursor);
+      },
+    );
 
     app.post("/api/applications", async (req, res) => {
       const applications = req.body;
