@@ -13,12 +13,24 @@ const uri = process.env.MONGDB_URI;
 
 // jwt token
 const logger = async (req, res, next) => {
-  console.log("first", req.params);
+  console.log("logger", req.params);
   next();
 };
 
 const veryFyToken = (req, res, next) => {
   console.log("first", req.headers);
+
+  const authHeder = req.headers?.authorization;
+  if (!authHeder) {
+    return res.status(401).send({ message: "Unothorize Access" });
+  }
+
+  const token = authHeder.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).send({ message: "Unothorize Access" });
+  }
+
   next();
 };
 
@@ -112,7 +124,7 @@ async function run() {
     // });
 
     // inefficent way to join/aggreget collection
-    app.get("/api/companies", async (req, res) => {
+    app.get("/api/companies", veryFyToken, async (req, res) => {
       const companies = await companyCollections.find().toArray();
 
       for (const company of companies) {
