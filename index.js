@@ -11,6 +11,17 @@ app.use(express.json());
 const port = process.env.PORT;
 const uri = process.env.MONGDB_URI;
 
+// jwt token
+const logger = async (req, res, next) => {
+  console.log("first", req.params);
+  next();
+};
+
+const veryFyToken = (req, res, next) => {
+  console.log("first", req.headers);
+  next();
+};
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -173,7 +184,7 @@ async function run() {
       res.json(result);
     });
 
-    app.patch("/api/companies/:id", async (req, res) => {
+    app.patch("/api/companies/:id", logger, veryFyToken, async (req, res) => {
       const { id } = req.params;
       const updatedCompany = req.body;
 
