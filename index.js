@@ -38,8 +38,6 @@ async function run() {
 
     // veryFecation Releted api
     const veryFyToken = async (req, res, next) => {
-      console.log("first", req.headers);
-
       const authHeder = req.headers?.authorization;
       if (!authHeder) {
         return res.status(401).send({ message: "Unothorize Access" });
@@ -65,8 +63,25 @@ async function run() {
       next();
     };
 
+    // must be used veryfytoken middleware
     const veriFySeeker = async (req, res, next) => {
-      if (req.user.role !== "seeker") {
+      if (req.user?.role !== "seeker") {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+      next();
+    };
+
+    // must be used veryfytoken middleware
+    const veryFyRecruiter = async (res, req, next) => {
+      if (req.user?.role !== "recruiter") {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+      next();
+    };
+
+    // must be used veryfytoken middleware
+    const verifyAdmin = (req, res, next) => {
+      if (req.user?.role !== "admin") {
         return res.status(403).send({ message: "Forbidden Access" });
       }
       next();
@@ -125,6 +140,10 @@ async function run() {
 
           // check whether asking for user information on some else
           console.log(req.user, req.query.applicantId);
+
+          if (req.user._id.toString() !== req.query.applicantId) {
+            return res.status(403).send({ message: "Forbidden Access" });
+          }
         }
         if (req.query.jobId) {
           query.jobId = req.query.jobId;
@@ -223,20 +242,26 @@ async function run() {
       res.json(result);
     });
 
-    app.patch("/api/companies/:id", logger, veryFyToken, async (req, res) => {
-      const { id } = req.params;
-      const updatedCompany = req.body;
+    app.patch(
+      "/api/companies/:id",
+      logger,
+      veryFyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const { id } = req.params;
+        const updatedCompany = req.body;
 
-      const fileter = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          status: updatedCompany.status,
-        },
-      };
+        const fileter = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            status: updatedCompany.status,
+          },
+        };
 
-      const result = await companyCollections.updateOne(fileter, updatedDoc);
-      res.json(result);
-    });
+        const result = await companyCollections.updateOne(fileter, updatedDoc);
+        res.json(result);
+      },
+    );
 
     // plans Releted api
     app.get("/api/plans", async (req, res) => {
