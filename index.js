@@ -87,12 +87,7 @@ async function run() {
       next();
     };
 
-    app.get("/api/users", async (req, res) => {
-      const result = await userCollectons.find().toArray();
-      res.json(result);
-    });
-
-    // get
+     // get jobs releted api
     app.get("/api/jobs", async (req, res) => {
       const query = {};
       if (req.query.companyId) {
@@ -170,7 +165,7 @@ async function run() {
     // });
 
     // inefficent way to join/aggreget collection
-    app.get("/api/companies", veryFyToken, async (req, res) => {
+    app.get("/api/companies", veryFyToken, verifyAdmin, async (req, res) => {
       const companies = await companyCollections.find().toArray();
 
       for (const company of companies) {
