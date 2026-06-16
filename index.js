@@ -87,9 +87,16 @@ async function run() {
       next();
     };
 
-     // get jobs releted api
+    // get jobs releted api
     app.get("/api/jobs", async (req, res) => {
       const query = {};
+
+      //  job fileter releted api
+      if (req.query.jobType) {
+        query.jobType = req.query.jobType;
+      }
+
+      // compan releted api
       if (req.query.companyId) {
         query.companyId = req.query.companyId;
       }
