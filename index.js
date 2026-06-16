@@ -92,8 +92,24 @@ async function run() {
       const query = {};
 
       //  job fileter releted api
+
+      if (req.query.search) {
+        query.$or = [
+          { jobTitle: { $regex: req.query.search, $options: "i" } },
+          { companyName: { $regex: req.query.search, $options: "i" } },
+        ]
+      }
+
       if (req.query.jobType) {
         query.jobType = req.query.jobType;
+      }
+
+      if (req.query.jobCategory) {
+        query.jobCategory = req.query.jobCategory;
+      }
+
+      if (req.query.isRemote) {
+        query.isRemote = req.query.isRemote;
       }
 
       // compan releted api
